@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from Adafruit-MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor, Adafruit_StepperMotor
+import RPi.GPIO as GPIO
 import pygame
 import time
 import atexit
@@ -20,6 +21,10 @@ interval = 0.1
 stepSpeedFast = 10
 stepSpeedSlow = 1
 stepSpeed
+#false means not firing true is firing
+gunState = False
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(18, GPIO.OUT)
 pygame.init()
 pygame.key.set_repeat(1, interval)
 screen = pygame.display.set_mode([400, 400])
@@ -58,11 +63,20 @@ def funcPygameKey(events):
 				stepper1.step(stepSpeed, Adafruit_MotorHAT.FORWARD, Adafruit_MotorHAT.DOUBLE)
 			elif event.key == pygame.k_SPACE:
 				print ('key space -fire the guns')
-				#insert trigger motor code here
+				if (gunState):
+					gunState = False
+				else:
+					gunState = True
+def fireTheGun():
+	if (gunState):
+		GPIO.ouput(18, GPIO.HIGH)
+	else:
+		GPIO.output(18, GPIO.LOW)
 try:
 	print ('program running- use keyboard to control YFNKR')
 	while True:
 		funcPygameKey(pygame.event.get())
+		fireTheGun()
 		time.sleep(interval)
 except KeyboardInterrupt:
 	print ('you chose to exit out of the keyboard controller')
